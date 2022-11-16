@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
+
 import MoviesList from './components/MoviesList'
 import './App.css'
 
@@ -7,11 +8,11 @@ function App() {
   const [isLoading, setisLoading] = useState(false)
   const [error, seterror] = useState(null)
 
-  const fetchdataHandler = async () => {
+  const fetchdataHandler = useCallback(async () => {
     setisLoading(true)
     seterror(null)
     try {
-      const responce = await fetch('https://swapi.dev/api/fi2lms')
+      const responce = await fetch('https://swapi.dev/api/films')
 
       if (!responce.ok) {
         throw new Error('somting went wrong')
@@ -38,22 +39,26 @@ function App() {
       //console.log(err.message)
     }
     setisLoading(false)
-  }
+  })
 
   useEffect(() => {
     if (error) {
       seterror('somting went wrong .....Retrying')
       let intervelid = setInterval(() => {
         fetchdataHandler()
-        console.log('calling ', intervelid)
+        console.log('am re trying ', intervelid)
       }, 5000)
 
       return () => {
-        console.log('cancel', intervelid)
+        console.log('am cancel', intervelid)
         clearInterval(intervelid)
       }
     }
-  }, [error])
+  }, [fetchdataHandler, error])
+
+  useEffect(() => {
+    fetchdataHandler()
+  }, [])
 
   //  }
   const cancelIntervel = () => {
@@ -69,7 +74,7 @@ function App() {
   if (error) {
     Content = <p>{error}</p>
   }
-  if (isLoading == true) {
+  if (isLoading === true) {
     Content = <p>Loading.....</p>
   }
 
